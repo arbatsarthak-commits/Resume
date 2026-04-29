@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Professional portfolio of Sarthak Arbat, aspiring software developer." />
+    <title>Sarthak Dev | Home</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body data-page="home">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="container nav-wrap">
+        <a href="index.html" class="logo">sarthak<span>.dev</span></a>
+
+        <nav class="nav-menu">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="skills.html">Skills</a>
+          <a href="education.html">Education</a>
+          <a href="projects.html">Projects</a>
+          <a href="experience.html">Experience</a>
+          <a href="certifications.html">Certifications</a>
+          <a href="positions.html">Positions</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+
+        <a class="resume-btn" href="assets/ARBAT_SARTHAK_SANJAY_Resume.txt" download>
+          <i class="fa-solid fa-download"></i> Resume
+        </a>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="page-main">
+      <section class="hero section">
+        <div class="container hero-grid">
+
+          <!-- LEFT -->
+          <div class="hero-text">
+            <p class="tag">📍 Pune, Maharashtra, India</p>
+            <h1>ARBAT SARTHAK SANJAY</h1>
+            <h2>Aspiring Software Developer</h2>
+
+            <p>
+              I design and build practical digital solutions with a focus on clean frontend,
+              backend integration, and cloud deployment.
+            </p>
+
+            <div class="hero-actions">
+              <a href="projects.html" class="btn">View Projects</a>
+              <a href="contact.html" class="btn">Contact Me</a>
+            </div>
+          </div>
+
+          <!-- RIGHT -->
+          <div class="hero-visual">
+            <div class="hero-card">
+              <h3>Professional Snapshot</h3>
+
+              <ul>
+                <li>💻 Web Development</li>
+                <li>☁️ AWS Cloud</li>
+                <li>🐳 Docker</li>
+                <li>🔐 Cybersecurity</li>
+              </ul>
+
+              <!-- VISITOR COUNTER -->
+              <div class="counter-box">
+                <span>Visitor Counter</span>
+                <strong id="visitor-counter">000000</strong>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container">
+        <p>© <span id="year"></span> ARBAT SARTHAK SANJAY</p>
+      </div>
+    </footer>
+
+    <!-- 🔥 WORKING VISITOR COUNTER SCRIPT -->
+    <script>
+      async function loadVisitorCount() {
+        try {
+          const response = await fetch(
+            "https://k1b2zd2dlf.execute-api.ap-south-1.amazonaws.com/count?t=" + new Date().getTime()
+          );
+
+          const data = await response.json();
+          const parsed = typeof data.body === "string" ? JSON.parse(data.body) : data;
+
+          const count = parsed.count;
+
+          console.log("Visitor Count:", count);
+
+          document.getElementById("visitor-counter").innerText = count;
+
+        } catch (error) {
+          console.error("Error:", error);
+          document.getElementById("visitor-counter").innerText = "ERR";
+        }
+      }
+
+      loadVisitorCount();
+
+      // Year auto update
+      document.getElementById("year").innerText = new Date().getFullYear();
+    </script>
+
+  </body>
+</html>
