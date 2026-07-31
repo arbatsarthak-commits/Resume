@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Login — ResumeIQ AI{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 480px;">
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <div class="hero-tag"><i class="fa-solid fa-lock"></i> Secure Authentication</div>
+    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem;">Welcome Back</h1>
+    <p style="color: var(--muted);">Sign in to your ResumeIQ account</p>
+  </div>
+
+  <div class="card" style="padding: 2rem;">
+    <form id="login-form">
+      <div id="auth-error" style="background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.4); color: var(--danger); padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; display: none;">
+        <i class="fa-solid fa-triangle-exclamation"></i> <span id="auth-error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" class="form-control" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required autocomplete="current-password" />
+      </div>
+
+      <button type="submit" id="login-btn" class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size: 1rem; margin-top: 0.5rem;">
+        <i class="fa-solid fa-right-to-bracket"></i> SIGN IN
+      </button>
+
+      <div style="text-align: center; margin-top: 1.2rem; font-size: 0.9rem; color: var(--muted);">
+        <p>Don't have an account? <a href="/register" style="color: var(--primary); font-weight: 600;">Create Account</a></p>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("login-form");
+  const errorDiv = document.getElementById("auth-error");
+  const errorMsg = document.getElementById("auth-error-message");
+  const btn = document.getElementById("login-btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorDiv.style.display = "none";
+
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    if (!email || !password) {
+      errorMsg.textContent = "Please fill in all fields.";
+      errorDiv.style.display = "block";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Signing In...';
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem("resumeiq_token", data.token);
+        localStorage.setItem("resumeiq_user", JSON.stringify({
+          user_id: data.user_id,
+          email: data.email,
+          full_name: data.full_name
+        }));
+        window.location.href = "/dashboard";
+      } else {
+        errorMsg.textContent = data.error || "Login failed.";
+        errorDiv.style.display = "block";
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> SIGN IN';
+      }
+    } catch (err) {
+      errorMsg.textContent = "Connection error. Please try again.";
+      errorDiv.style.display = "block";
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> SIGN IN';
+    }
+  });
+});
+</script>
+{% endblock %}
+

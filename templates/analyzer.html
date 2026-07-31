@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}ATS Resume Analyzer — ResumeIQ{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 850px;">
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <div class="hero-tag"><i class="fa-solid fa-microchip"></i> ATS Parsing & Compatibility Engine</div>
+    <h1 style="font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem;">ATS Resume Analyzer</h1>
+    <p style="color: var(--muted); font-size: 1.05rem;">
+      Upload your PDF or DOCX resume to extract sections, evaluate structure, identify technical skills, and analyze ATS compatibility.
+    </p>
+  </div>
+
+  <div class="card">
+    <form id="analyzer-form">
+      
+      <!-- DROPZONE -->
+      <div class="form-group">
+        <label style="font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem;">Upload Resume (PDF or DOCX)</label>
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+          <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem;">Drag & drop your resume file here</h3>
+          <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem;">Supports PDF and DOCX documents up to 5 MB</p>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('resume-file').click();">
+            <i class="fa-solid fa-folder-open"></i> Choose File
+          </button>
+          <input type="file" id="resume-file" name="resume" accept=".pdf,.docx" style="display: none;" />
+          <div id="file-info" style="margin-top: 1rem; font-weight: 600; color: var(--primary); display: none;"></div>
+        </div>
+      </div>
+
+      <!-- OPTIONAL JOB DESCRIPTION -->
+      <div class="form-group" style="margin-top: 1.8rem;">
+        <label style="font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem;">
+          Target Job Description <span style="font-weight: 400; color: var(--muted); font-size: 0.88rem;">(Optional for Job Matching)</span>
+        </label>
+        <textarea 
+          id="job-description" 
+          name="job_description" 
+          class="form-control" 
+          rows="5" 
+          placeholder="Paste the target job description requirements here to get a Job-Specific Match Score and identify missing skills..."></textarea>
+      </div>
+
+      <!-- ERROR ALERT CONTAINER -->
+      <div id="error-alert" class="card" style="background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.4); color: var(--danger); margin-bottom: 1rem; display: none;">
+        <i class="fa-solid fa-triangle-exclamation"></i> <span id="error-message"></span>
+      </div>
+
+      <!-- PROCESSING SPINNER -->
+      <div id="processing-indicator" style="text-align: center; margin: 1.5rem 0; display: none;">
+        <div style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+        </div>
+        <p style="font-weight: 600; color: var(--text);">Analyzing resume document...</p>
+        <p style="font-size: 0.85rem; color: var(--muted);">Extracting text, evaluating section structure, & matching skill dictionaries</p>
+      </div>
+
+      <!-- SUBMIT BUTTON -->
+      <button type="submit" id="analyze-btn" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1.05rem; margin-top: 0.5rem;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> ANALYZE RESUME
+      </button>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+{% endblock %}

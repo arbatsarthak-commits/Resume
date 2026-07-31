@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Interview Results — ResumeIQ AI{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <div class="hero-tag"><i class="fa-solid fa-chart-bar"></i> Session Review</div>
+    <h1 style="font-size: 2rem; font-weight: 800;">Interview Results</h1>
+  </div>
+
+  <div id="results-container">
+    <div style="text-align: center; padding: 2rem;">
+      <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+      <p style="color: var(--muted); margin-top: 1rem;">Loading session results...</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const SESSION_ID = "{{ session_id }}";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!SESSION_ID) {
+    document.getElementById("results-container").innerHTML = '<p style="text-align: center; color: var(--danger);">No session ID provided.</p>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/interview/session/${SESSION_ID}`);
+    const data = await res.json();
+    
+    if (!data.success || !data.session) {
+      document.getElementById("results-container").innerHTML = '<p style="text-align: center; color: var(--danger);">Session not found.</p>';
+      return;
+    }
+
+    const session = data.session;
+    const results = session.results_json || {};
+    const questions = results.questions || [];
+    const evaluations = results.evaluations || [];
+    const readiness = results.readiness || {};
+
+    let html = `
+      <div class="grid-2" style="margin-bottom: 1.5rem;">
+        <div class="card score-card">
+          <span style="color: var(--muted);">Average Score</span>
+          <div class="score-number high" style="font-size: 3rem;">${session.general_score || 0}%</div>
+        </div>
+        <div class="card score-card">
+          <span style="color: var(--muted);">Readiness Score</span>
+          <div class="score-number medium" style="font-size: 3rem;">${readiness.readiness_score || 0}%</div>
+          <p style="color: var(--muted); font-size: 0.85rem;">${readiness.message || ''}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom: 1rem;">Question Review</h3>
+    `;
+
+    questions.forEach((q, i) => {
+      const evalData = evaluations[i] || {};
+      html += `
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.8rem;">
+          <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div style="flex: 1;">
+              <span class="tag-chip">Q${i+1}</span>
+              <span class="tag-chip">${q.type || 'General'}</span>
+              <p style="margin-top: 0.5rem; font-weight: 600;">${q.question || ''}</p>
+              <p style="color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem;">
+                <strong>Your Answer:</strong> ${results.answers?.[i] ? results.answers[i].substring(0, 200) + '...' : 'N/A'}
+              </p>
+            </div>
+            <div style="text-align: right; min-width: 80px;">
+              <div style="font-size: 1.5rem; font-weight: 800; color: ${evalData.overall_score >= 70 ? 'var(--success)' : evalData.overall_score >= 40 ? 'var(--warning)' : 'var(--danger)'}">
+                ${evalData.overall_score || 0}
+              </div>
+              <span style="font-size: 0.75rem; color: var(--muted);">Score</span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    document.getElementById("results-container").innerHTML = html;
+
+  } catch (err) {
+    document.getElementById("results-container").innerHTML = '<p style="text-align: center; color: var(--danger);">Failed to load results.</p>';
+  }
+});
+</script>
+{% endblock %}
+

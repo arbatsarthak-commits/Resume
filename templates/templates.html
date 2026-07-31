@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Templates — ResumeIQ{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="text-align: center; margin-bottom: 3rem;">
+    <div class="hero-tag"><i class="fa-solid fa-layer-group"></i> ATS-Compliant Layouts</div>
+    <h1 style="font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem;">Resume Templates</h1>
+    <p style="color: var(--muted); font-size: 1.05rem; max-width: 700px; margin: 0 auto;">
+      All templates are engineered specifically for applicant tracking system readability. Clean hierarchy, clear headers, zero non-standard graphics.
+    </p>
+  </div>
+
+  <div class="grid-3">
+    <!-- TEMPLATE 1 -->
+    <div class="card feature-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div class="feature-icon"><i class="fa-solid fa-align-left"></i></div>
+        <h3>Minimal ATS</h3>
+        <p style="margin-bottom: 1rem;">Ultra-clean, single-column monochrome template optimized for maximum ATS parsing accuracy and conservative corporate roles.</p>
+        <ul style="color: var(--muted); font-size: 0.88rem; padding-left: 1.2rem; margin-bottom: 1.5rem;">
+          <li>100% Standard ATS header hierarchy</li>
+          <li>Selectable PDF typography</li>
+          <li>Optimized for corporate ATS systems</li>
+        </ul>
+      </div>
+      <a href="/builder?template=minimal_ats" class="btn btn-primary" style="width: 100%;">Use Minimal ATS</a>
+    </div>
+
+    <!-- TEMPLATE 2 -->
+    <div class="card feature-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div class="feature-icon"><i class="fa-solid fa-code"></i></div>
+        <h3>Software Engineer</h3>
+        <p style="margin-bottom: 1rem;">Tailored for developers and tech professionals with highlighted tech stack chips, project repository links, and clear skill categories.</p>
+        <ul style="color: var(--muted); font-size: 0.88rem; padding-left: 1.2rem; margin-bottom: 1.5rem;">
+          <li>GitHub & Live Demo link support</li>
+          <li>Categorized skills section</li>
+          <li>Slate blue accent color theme</li>
+        </ul>
+      </div>
+      <a href="/builder?template=software_engineer" class="btn btn-primary" style="width: 100%;">Use Software Engineer</a>
+    </div>
+
+    <!-- TEMPLATE 3 -->
+    <div class="card feature-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div class="feature-icon"><i class="fa-solid fa-user-tie"></i></div>
+        <h3>Modern Professional</h3>
+        <p style="margin-bottom: 1rem;">Contemporary design balancing visual elegance with strict ATS compliance. Ideal for mid-level and senior technical leaders.</p>
+        <ul style="color: var(--muted); font-size: 0.88rem; padding-left: 1.2rem; margin-bottom: 1.5rem;">
+          <li>Indigo accent section headers</li>
+          <li>Clean bullet list spacing</li>
+          <li>Emphasis on impact & achievements</li>
+        </ul>
+      </div>
+      <a href="/builder?template=modern_professional" class="btn btn-primary" style="width: 100%;">Use Modern Professional</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

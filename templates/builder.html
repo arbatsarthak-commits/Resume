@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Builder — ResumeIQ{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="section-header-row">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800;">Interactive Resume Builder</h1>
+      <p style="color: var(--muted); font-size: 0.95rem;">Build an ATS-friendly, professional resume with real-time preview & instant PDF download.</p>
+    </div>
+    <div style="display: flex; gap: 0.8rem; align-items: center;">
+      <select id="template-select" class="form-control" style="width: auto; padding: 0.5rem 0.8rem;">
+        <option value="minimal_ats">Minimal ATS Template</option>
+        <option value="software_engineer">Software Engineer Template</option>
+        <option value="modern_professional">Modern Professional Template</option>
+      </select>
+      <button id="download-pdf-btn" class="btn btn-primary">
+        <i class="fa-solid fa-download"></i> Download PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="builder-container">
+    <!-- FORM LEFT -->
+    <div class="builder-form-wrap">
+      
+      <!-- 1. PERSONAL INFORMATION -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-user"></i> Personal Information</h3>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="full_name" class="form-control" value="John Doe" placeholder="e.g. Sarthak Arbat" />
+          </div>
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="email" class="form-control" value="john.doe@example.com" placeholder="john@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Phone *</label>
+            <input type="text" id="phone" class="form-control" value="+1 (555) 019-2834" placeholder="+91 9876543210" />
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="location" class="form-control" value="Pune, India" placeholder="City, Country" />
+          </div>
+          <div class="form-group">
+            <label>LinkedIn URL</label>
+            <input type="url" id="linkedin" class="form-control" value="linkedin.com/in/johndoe" placeholder="https://linkedin.com/in/username" />
+          </div>
+          <div class="form-group">
+            <label>GitHub URL</label>
+            <input type="url" id="github" class="form-control" value="github.com/johndoe" placeholder="https://github.com/username" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Portfolio / Website</label>
+          <input type="url" id="portfolio" class="form-control" value="johndoe.dev" placeholder="https://yourportfolio.com" />
+        </div>
+      </div>
+
+      <!-- 2. PROFESSIONAL SUMMARY -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-align-left"></i> Professional Summary</h3>
+        <div class="form-group">
+          <textarea id="summary" class="form-control" rows="3" placeholder="Briefly summarize your core experience, technical background, and career achievements...">Software Engineer with 3+ years of experience designing scalable web applications, REST APIs, and AWS cloud architecture. Proficient in Python, Flask, React, Docker, and PostgreSQL with a passion for clean code and performance optimization.</textarea>
+        </div>
+      </div>
+
+      <!-- 3. EDUCATION (DYNAMIC) -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="section-header-row" style="margin-bottom: 0.8rem;">
+          <h3 style="font-size: 1.1rem; color: var(--primary);"><i class="fa-solid fa-graduation-cap"></i> Education</h3>
+          <button id="add-education-btn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Add Education</button>
+        </div>
+        <div id="education-container"></div>
+      </div>
+
+      <!-- 4. WORK EXPERIENCE (DYNAMIC) -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="section-header-row" style="margin-bottom: 0.8rem;">
+          <h3 style="font-size: 1.1rem; color: var(--primary);"><i class="fa-solid fa-briefcase"></i> Work Experience</h3>
+          <button id="add-experience-btn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Add Experience</button>
+        </div>
+        <div id="experience-container"></div>
+      </div>
+
+      <!-- 5. PROJECTS (DYNAMIC) -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="section-header-row" style="margin-bottom: 0.8rem;">
+          <h3 style="font-size: 1.1rem; color: var(--primary);"><i class="fa-solid fa-code-fork"></i> Projects</h3>
+          <button id="add-project-btn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Add Project</button>
+        </div>
+        <div id="projects-container"></div>
+      </div>
+
+      <!-- 6. SKILLS -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-gears"></i> Technical Skills</h3>
+        <div class="form-group">
+          <label>Programming Languages (comma separated)</label>
+          <input type="text" id="skills_languages" class="form-control" value="Python, JavaScript, TypeScript, C++, SQL" />
+        </div>
+        <div class="form-group">
+          <label>Frameworks (comma separated)</label>
+          <input type="text" id="skills_frameworks" class="form-control" value="Flask, React, Node.js, Express, TailwindCSS" />
+        </div>
+        <div class="form-group">
+          <label>Cloud & Infrastructure (comma separated)</label>
+          <input type="text" id="skills_cloud" class="form-control" value="AWS, Lambda, S3, DynamoDB, Docker, Kubernetes" />
+        </div>
+        <div class="form-group">
+          <label>Databases & Tools (comma separated)</label>
+          <input type="text" id="skills_tools" class="form-control" value="PostgreSQL, SQLite, Redis, Git, GitHub Actions, Postman" />
+        </div>
+      </div>
+
+      <!-- 7. CERTIFICATIONS & ACHIEVEMENTS -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-award"></i> Certifications & Achievements</h3>
+        <div class="form-group">
+          <label>Certifications (one per line)</label>
+          <textarea id="certifications" class="form-control" rows="2" placeholder="AWS Certified Solutions Architect&#10;Google Cloud Associate Engineer">AWS Certified Solutions Architect - Associate&#10;Certified Kubernetes Application Developer (CKAD)</textarea>
+        </div>
+        <div class="form-group">
+          <label>Achievements / Leadership (one per line)</label>
+          <textarea id="achievements" class="form-control" rows="2" placeholder="Winner of University Hackathon 2025&#10;Lead Tech Speaker at DevCon">Winner of National Hackathon 2025 out of 150+ teams&#10;Lead Vice President of Computer Science Society</textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- LIVE PREVIEW RIGHT -->
+    <div class="builder-preview-wrap">
+      <div style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.88rem; color: var(--muted); font-weight: 600;"><i class="fa-solid fa-eye"></i> Live ATS Resume Preview</span>
+        <span style="font-size: 0.8rem; color: var(--primary);"><i class="fa-solid fa-arrows-rotate"></i> Auto-Syncing</span>
+      </div>
+
+      <div id="live-preview" class="preview-panel">
+        <!-- Rendered dynamically by builder.js -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/builder.js') }}"></script>
+{% endblock %}

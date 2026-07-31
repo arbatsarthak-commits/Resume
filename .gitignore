@@ -1,0 +1,33 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Environment file
+.env
+
+# Uploaded and generated files (keep directory struct via .gitkeep)
+storage/uploads/*
+!storage/uploads/.gitkeep
+storage/generated/*
+!storage/generated/.gitkeep
+
+# Database
+data/*.db
+!data/.gitkeep
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# OS generated
+.DS_Store
+Thumbs.db

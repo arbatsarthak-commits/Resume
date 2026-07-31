@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: ResumeIQ — Serverless Cloud Deployment Architecture (Lambda, API Gateway, S3, DynamoDB)
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.11
+    Environment:
+      Variables:
+        APP_ENV: production
+        STORAGE_MODE: aws
+        DATABASE_MODE: dynamodb
+        AWS_S3_BUCKET: !Ref ResumeIQS3Bucket
+        AWS_DYNAMODB_TABLE: !Ref ResumeIQDynamoDBTable
+
+Resources:
+
+  # 1. AWS Lambda Function
+  ResumeIQFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../
+      Handler: lambda/handler.handler
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref ResumeIQS3Bucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ResumeIQDynamoDBTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+  # 2. Amazon S3 Storage Bucket (Private)
+  ResumeIQS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "resumeiq-storage-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # 3. Amazon DynamoDB Table
+  ResumeIQDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: resumeiq-analyses
+      AttributeDefinitions:
+        - AttributeName: analysis_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: analysis_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  ResumeIQApiUrl:
+    Description: "API Gateway Endpoint URL for ResumeIQ Cloud Mode"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  S3BucketName:
+    Description: "Private S3 Bucket Name"
+    Value: !Ref ResumeIQS3Bucket
+  DynamoDBTableName:
+    Description: "DynamoDB Table Name"
+    Value: !Ref ResumeIQDynamoDBTable

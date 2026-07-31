@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}ATS Analysis Dashboard — ResumeIQ{% endblock %}
+
+{% block content %}
+<div class="container section">
+  
+  <div class="section-header-row" style="margin-bottom: 2rem;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800;">ATS Analysis Dashboard</h1>
+      <p style="color: var(--muted);">View comprehensive score breakdowns, section hygiene, skill gap analysis, and historical records.</p>
+    </div>
+    <div>
+      <a href="/analyzer" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Analyze New Resume</a>
+    </div>
+  </div>
+
+  <!-- ACTIVE ANALYSIS RESULT CONTAINER -->
+  <div id="active-analysis-container" style="display: none;">
+    
+    <!-- TOP SCORECARDS -->
+    <div class="grid-2" style="margin-bottom: 1.5rem;">
+      
+      <!-- GENERAL SCORE -->
+      <div class="card score-card">
+        <span style="color: var(--muted); font-size: 0.95rem; font-weight: 600;">GENERAL RESUME QUALITY SCORE</span>
+        <div id="dash-gen-score" class="score-number high">--</div>
+        <p style="color: var(--muted); font-size: 0.85rem;">Based on structure, contact info, skills, and formatting hygiene.</p>
+        <div class="score-bar-wrap">
+          <div id="dash-gen-bar" class="score-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- JOB MATCH SCORE -->
+      <div class="card score-card">
+        <span style="color: var(--muted); font-size: 0.95rem; font-weight: 600;">ESTIMATED ATS JOB MATCH</span>
+        <div id="dash-job-score" class="score-number medium">--</div>
+        <p style="color: var(--muted); font-size: 0.85rem;" id="dash-job-subtitle">Job Description matching evaluation.</p>
+        <div class="score-bar-wrap">
+          <div id="dash-job-bar" class="score-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MAIN METRICS GRID -->
+    <div class="grid-2" style="margin-bottom: 1.5rem;">
+      
+      <!-- SCORE BREAKDOWN -->
+      <div class="card">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1.2rem; color: var(--primary);"><i class="fa-solid fa-chart-bar"></i> Score Breakdown</h3>
+        <div id="score-breakdown-list" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+      </div>
+
+      <!-- SECTION ANALYSIS CHECKLIST -->
+      <div class="card">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1.2rem; color: var(--primary);"><i class="fa-solid fa-list-check"></i> Section Analysis</h3>
+        <div id="section-checklist" class="grid-2" style="gap: 0.8rem;"></div>
+      </div>
+
+    </div>
+
+    <!-- SKILLS & KEYWORDS DETECTED / MISSING -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-tags"></i> Skill & Keyword Analysis</h3>
+      
+      <div style="margin-bottom: 1rem;">
+        <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 0.5rem;">Detected Technical Skills:</h4>
+        <div id="dash-detected-skills" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
+      </div>
+
+      <div id="jd-skills-comparison-wrap" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+        <div class="grid-2">
+          <div>
+            <h4 style="font-size: 0.95rem; color: var(--success); margin-bottom: 0.5rem;"><i class="fa-solid fa-check"></i> Matched Job Skills:</h4>
+            <div id="dash-matched-skills" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
+          </div>
+          <div>
+            <h4 style="font-size: 0.95rem; color: var(--danger); margin-bottom: 0.5rem;"><i class="fa-solid fa-xmark"></i> Missing / Undetected Skills:</h4>
+            <div id="dash-missing-skills" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONABLE RECOMMENDATIONS -->
+    <div class="card" style="margin-bottom: 2rem;">
+      <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-lightbulb"></i> Optimization Recommendations</h3>
+      <div id="dash-recommendations-list" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+    </div>
+
+  </div>
+
+  <!-- ANALYSIS HISTORY TABLE -->
+  <div class="card">
+    <h3 style="font-size: 1.2rem; margin-bottom: 1rem;"><i class="fa-solid fa-clock-rotate-left"></i> Analysis History</h3>
+    <div style="overflow-x: auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Resume Filename</th>
+            <th>General Score</th>
+            <th>Job Match Score</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="history-table-body">
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--muted); padding: 2rem;">Loading analysis history...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const INITIAL_ANALYSIS_ID = "{{ initial_analysis_id }}";
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadHistory();
+  if (INITIAL_ANALYSIS_ID) {
+    loadAnalysisDetails(INITIAL_ANALYSIS_ID);
+  }
+});
+
+async function loadHistory() {
+  try {
+    const res = await fetch("/api/analysis");
+    const data = await res.json();
+    const tbody = document.getElementById("history-table-body");
+    
+    if (!data.success || !data.analyses || data.analyses.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--muted); padding: 2rem;">No previous analyses found. <a href="/analyzer" style="color: var(--primary);">Analyze a resume</a> to get started.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.analyses.map(item => {
+      const dateStr = new Date(item.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const jobScoreStr = item.job_match_score !== null && item.job_match_score !== undefined ? `${item.job_match_score}%` : 'N/A';
+      return `
+        <tr>
+          <td>${dateStr}</td>
+          <td><strong>${item.resume_filename || 'resume.pdf'}</strong></td>
+          <td><span style="font-weight: 700; color: var(--primary);">${item.general_score} / 100</span></td>
+          <td>${jobScoreStr}</td>
+          <td>
+            <div style="display: flex; gap: 0.4rem;">
+              <button class="btn btn-secondary btn-sm" onclick="loadAnalysisDetails('${item.analysis_id}')"><i class="fa-solid fa-eye"></i> View</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteAnalysis('${item.analysis_id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // If no initial ID provided, auto load top result
+    if (!INITIAL_ANALYSIS_ID && data.analyses.length > 0) {
+      loadAnalysisDetails(data.analyses[0].analysis_id);
+    }
+  } catch (err) {
+    console.error("Failed to load history:", err);
+  }
+}
+
+async function loadAnalysisDetails(analysisId) {
+  try {
+    const res = await fetch(`/api/analysis/${analysisId}`);
+    const data = await res.json();
+    if (!data.success) return;
+
+    const record = data.data;
+    document.getElementById("active-analysis-container").style.display = "block";
+    window.scrollTo({ top: 120, behavior: 'smooth' });
+
+    // Scores
+    document.getElementById("dash-gen-score").innerText = `${record.general_score} / 100`;
+    document.getElementById("dash-gen-bar").style.width = `${record.general_score}%`;
+
+    if (record.job_match_score !== null && record.job_match_score !== undefined) {
+      document.getElementById("dash-job-score").innerText = `${record.job_match_score}%`;
+      document.getElementById("dash-job-bar").style.width = `${record.job_match_score}%`;
+      document.getElementById("dash-job-subtitle").innerText = "Estimated compatibility with target Job Description.";
+    } else {
+      document.getElementById("dash-job-score").innerText = "N/A";
+      document.getElementById("dash-job-bar").style.width = "0%";
+      document.getElementById("dash-job-subtitle").innerText = "No Job Description was provided for this analysis.";
+    }
+
+    // Breakdown
+    const breakdown = record.score_breakdown || {};
+    const breakdownMap = [
+      { label: "Structure & Sections", val: breakdown.structure, max: 25 },
+      { label: "Contact Information", val: breakdown.contact, max: 10 },
+      { label: "Technical Skills", val: breakdown.skills, max: 20 },
+      { label: "Work Experience", val: breakdown.experience, max: 15 },
+      { label: "Projects", val: breakdown.projects, max: 15 },
+      { label: "Formatting & Hygiene", val: breakdown.formatting, max: 10 },
+      { label: "Certifications / Honors", val: breakdown.certifications, max: 5 }
+    ];
+
+    document.getElementById("score-breakdown-list").innerHTML = breakdownMap.map(b => `
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.2rem;">
+          <span>${b.label}</span>
+          <strong>${b.val} / ${b.max}</strong>
+        </div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-fill" style="width: ${(b.val / b.max) * 100}%;"></div>
+        </div>
+      </div>
+    `).join('');
+
+    // Sections checklist
+    const secs = record.sections || {};
+    const secLabels = [
+      { key: "contact", title: "Contact Information" },
+      { key: "summary", title: "Professional Summary" },
+      { key: "education", title: "Education" },
+      { key: "experience", title: "Work Experience" },
+      { key: "projects", title: "Projects" },
+      { key: "skills", title: "Technical Skills" },
+      { key: "certifications", title: "Certifications" }
+    ];
+
+    document.getElementById("section-checklist").innerHTML = secLabels.map(s => {
+      const present = secs[s.key];
+      const icon = present ? '<i class="fa-solid fa-circle-check" style="color: var(--success);"></i>' : '<i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i>';
+      return `<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">${icon} <span>${s.title}</span></div>`;
+    }).join('');
+
+    // Skills
+    const detSkills = record.detected_skills || [];
+    document.getElementById("dash-detected-skills").innerHTML = detSkills.length 
+      ? detSkills.map(s => `<span class="tag-chip">${s}</span>`).join('')
+      : '<span style="color: var(--muted); font-size: 0.9rem;">No technical skills detected.</span>';
+
+    // JD Skills Comparison
+    const compWrap = document.getElementById("jd-skills-comparison-wrap");
+    if (record.matched_skills && record.matched_skills.length || record.missing_skills && record.missing_skills.length) {
+      compWrap.style.display = "block";
+      document.getElementById("dash-matched-skills").innerHTML = record.matched_skills.map(s => `<span class="tag-chip matched"><i class="fa-solid fa-check"></i> ${s}</span>`).join('');
+      document.getElementById("dash-missing-skills").innerHTML = record.missing_skills.map(s => `<span class="tag-chip missing"><i class="fa-solid fa-xmark"></i> ${s}</span>`).join('');
+    } else {
+      compWrap.style.display = "none";
+    }
+
+    // Recommendations
+    const recs = record.recommendations || [];
+    document.getElementById("dash-recommendations-list").innerHTML = recs.map(r => `
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 0.8rem; border-radius: 8px; display: flex; align-items: flex-start; gap: 0.8rem;">
+        <span class="recommendation-badge ${r.priority}">${r.priority}</span>
+        <div>
+          <strong style="font-size: 0.9rem; display: block; color: var(--text);">${r.category}</strong>
+          <p style="color: var(--muted); font-size: 0.88rem; margin-top: 0.2rem;">${r.message}</p>
+        </div>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    console.error("Error loading analysis details:", err);
+  }
+}
+
+async function deleteAnalysis(analysisId) {
+  if (!confirm("Are you sure you want to delete this analysis record and its stored file?")) return;
+  try {
+    const res = await fetch(`/api/analysis/${analysisId}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById("active-analysis-container").style.display = "none";
+      loadHistory();
+    }
+  } catch (err) {
+    alert("Failed to delete analysis record.");
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}ResumeIQ — Build Better Resumes. Beat the ATS.{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section class="hero section">
+  <div class="container">
+    <div class="hero-tag">
+      <i class="fa-solid fa-bolt"></i> Cloud-Based & Local ATS Optimization Platform
+    </div>
+
+    <h1>Resume<span>IQ</span></h1>
+    <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; margin-bottom: 1rem;">
+      Build Better Resumes. Beat the ATS.
+    </h2>
+
+    <p class="subheading">
+      Create ATS-friendly resumes, analyze resume structure, compare your resume with job descriptions, identify missing keywords, and receive actionable recommendations.
+    </p>
+
+    <div class="hero-actions">
+      <a href="/builder" class="btn btn-primary">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> BUILD RESUME
+      </a>
+      <a href="/analyzer" class="btn btn-secondary">
+        <i class="fa-solid fa-magnifying-glass-chart"></i> ANALYZE RESUME
+      </a>
+      <a href="/matcher" class="btn btn-secondary">
+        <i class="fa-solid fa-bullseye"></i> MATCH A JOB
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="section" style="background: rgba(15, 23, 42, 0.4); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 style="font-size: 2rem; font-weight: 700;">Engineered for ATS Success</h2>
+      <p style="color: var(--muted); max-width: 600px; margin: 0.5rem auto 0;">
+        Powered by a deterministic scoring engine that evaluates section hierarchy, skill dictionaries, and keyword alignment.
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-file-pen"></i></div>
+        <h3>ATS Resume Builder</h3>
+        <p>Interactive form builder with desktop split-screen live preview. Supports dynamic sections and exports standard selectable-text PDFs.</p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-microchip"></i></div>
+        <h3>Deterministic ATS Engine</h3>
+        <p>Scans PDF and DOCX files to evaluate contact data, section structure, formatting hygiene, and categorized technical skills.</p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-crosshair"></i></div>
+        <h3>Job Description Matcher</h3>
+        <p>Compares your resume against specific target job descriptions to calculate an Estimated ATS Compatibility score and reveal skill gaps.</p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-list-check"></i></div>
+        <h3>Actionable Recommendations</h3>
+        <p>Prioritized suggestions (HIGH, MEDIUM, LOW) to optimize formatting and highlight missing technical skills truthfully.</p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+        <h3>Dual-Mode Architecture</h3>
+        <p>Operates 100% locally out-of-the-box with SQLite and local storage, or deploys serverless to AWS Lambda, S3, and DynamoDB.</p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-user-shield"></i></div>
+        <h3>Privacy & Security</h3>
+        <p>Your resume data stays under your control. Complete deletion capability for analysis history and stored files.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 style="font-size: 2rem; font-weight: 700;">How It Works</h2>
+      <p style="color: var(--muted);">Four simple steps to optimize your resume for applicant tracking systems.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">01</div>
+        <h4>Upload or Build</h4>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem;">Upload your existing PDF/DOCX resume or build one using our ATS-optimized builder.</p>
+      </div>
+
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">02</div>
+        <h4>Instant Analysis</h4>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem;">Our deterministic parser extracts text, detects headers, and catalogs technical skills.</p>
+      </div>
+
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">03</div>
+        <h4>Target Job Match</h4>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem;">Paste a job description to discover matched keywords and undetected skill requirements.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALL TO ACTION -->
+<section class="section" style="background: linear-gradient(135deg, rgba(110, 168, 254, 0.1), rgba(139, 92, 246, 0.1)); border-top: 1px solid var(--border);">
+  <div class="container" style="text-align: center;">
+    <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.8rem;">Ready to Boost Your Interview Callback Rate?</h2>
+    <p style="color: var(--muted); max-width: 650px; margin: 0 auto 1.8rem;">
+      Analyze your resume for free in seconds. Zero registration or external API dependencies required.
+    </p>
+    <a href="/analyzer" class="btn btn-primary btn-lg">
+      <i class="fa-solid fa-upload"></i> Analyze Your Resume Now
+    </a>
+  </div>
+</section>
+{% endblock %}

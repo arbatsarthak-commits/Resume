@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account — ResumeIQ AI{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 520px;">
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <div class="hero-tag"><i class="fa-solid fa-user-plus"></i> Get Started Free</div>
+    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem;">Create Your Account</h1>
+    <p style="color: var(--muted);">Build better resumes, ace your interviews</p>
+  </div>
+
+  <div class="card" style="padding: 2rem;">
+    <form id="register-form">
+      <div id="auth-error" style="background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.4); color: var(--danger); padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; display: none;">
+        <i class="fa-solid fa-triangle-exclamation"></i> <span id="auth-error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="reg-name" class="form-control" placeholder="John Doe" required autocomplete="name" />
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="reg-email" class="form-control" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="reg-password" class="form-control" placeholder="At least 6 characters" required autocomplete="new-password" minlength="6" />
+      </div>
+
+      <button type="submit" id="register-btn" class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size: 1rem; margin-top: 0.5rem;">
+        <i class="fa-solid fa-user-plus"></i> CREATE ACCOUNT
+      </button>
+
+      <div style="text-align: center; margin-top: 1.2rem; font-size: 0.9rem; color: var(--muted);">
+        <p>Already have an account? <a href="/login" style="color: var(--primary); font-weight: 600;">Sign In</a></p>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("register-form");
+  const errorDiv = document.getElementById("auth-error");
+  const errorMsg = document.getElementById("auth-error-message");
+  const btn = document.getElementById("register-btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorDiv.style.display = "none";
+
+    const full_name = document.getElementById("reg-name").value.trim();
+    const email = document.getElementById("reg-email").value.trim();
+    const password = document.getElementById("reg-password").value;
+
+    if (!full_name || !email || !password) {
+      errorMsg.textContent = "Please fill in all fields.";
+      errorDiv.style.display = "block";
+      return;
+    }
+
+    if (password.length < 6) {
+      errorMsg.textContent = "Password must be at least 6 characters.";
+      errorDiv.style.display = "block";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating Account...';
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, full_name })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem("resumeiq_token", data.token);
+        localStorage.setItem("resumeiq_user", JSON.stringify({
+          user_id: data.user_id,
+          email: data.email,
+          full_name: data.full_name
+        }));
+        window.location.href = "/dashboard";
+      } else {
+        errorMsg.textContent = data.error || "Registration failed.";
+        errorDiv.style.display = "block";
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> CREATE ACCOUNT';
+      }
+    } catch (err) {
+      errorMsg.textContent = "Connection error. Please try again.";
+      errorDiv.style.display = "block";
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> CREATE ACCOUNT';
+    }
+  });
+});
+</script>
+{% endblock %}
+

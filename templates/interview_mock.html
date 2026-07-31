@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Mock Interview — ResumeIQ AI{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 900px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+      <div class="hero-tag"><i class="fa-solid fa-phone"></i> Mock Interview</div>
+      <h1 style="font-size: 1.8rem; font-weight: 800;">{{ interview_type | capitalize }} Interview</h1>
+    </div>
+    <div style="text-align: right;">
+      <span id="question-counter" style="font-size: 1rem; color: var(--muted);">Question 1 of <span id="total-questions">0</span></span>
+      <div id="progress-bar-wrap" style="width: 200px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 0.4rem;">
+        <div id="progress-bar-fill" class="score-bar-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MCQ Option (hidden for non-MCQ) -->
+  <div id="mcq-options" style="display: none; margin-bottom: 1rem;">
+    <div class="card">
+      <h3 style="margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-list"></i> Select your answer:</h3>
+      <div id="mcq-choices" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+    </div>
+  </div>
+
+  <!-- Question Card -->
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+      <span id="question-category" class="tag-chip">{{ category or "General" }}</span>
+      <span id="question-difficulty" class="tag-chip">{{ difficulty or "medium" }}</span>
+    </div>
+    <h2 id="question-text" style="font-size: 1.3rem; font-weight: 600; line-height: 1.5; margin-bottom: 1.5rem;">
+      Loading question...
+    </h2>
+
+    <!-- Voice Input -->
+    <div style="margin-bottom: 1rem;">
+      <button id="voice-btn" class="btn btn-secondary btn-sm" onclick="toggleVoice()">
+        <i class="fa-solid fa-microphone"></i> <span id="voice-label">Speak Answer</span>
+      </button>
+      <span id="voice-status" style="color: var(--muted); font-size: 0.85rem; margin-left: 0.5rem;"></span>
+    </div>
+
+    <!-- Answer Input -->
+    <div class="form-group">
+      <label style="font-weight: 600;">Your Answer:</label>
+      <textarea id="answer-input" class="form-control" rows="6" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <button id="submit-answer-btn" class="btn btn-primary" onclick="submitAnswer()" disabled>
+      <i class="fa-solid fa-paper-plane"></i> SUBMIT ANSWER
+    </button>
+  </div>
+
+  <!-- Feedback Card (hidden initially) -->
+  <div id="feedback-card" class="card" style="display: none; margin-bottom: 1.5rem; border-color: rgba(52, 211, 153, 0.3);">
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--success);">
+      <i class="fa-solid fa-circle-check"></i> AI Feedback
+    </h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+      <div class="card score-card" style="padding: 0.8rem;">
+        <span style="font-size: 0.75rem; color: var(--muted);">Communication</span>
+        <div id="eval-communication" class="score-number" style="font-size: 1.5rem;">0</div>
+      </div>
+      <div class="card score-card" style="padding: 0.8rem;">
+        <span style="font-size: 0.75rem; color: var(--muted);">Completeness</span>
+        <div id="eval-completeness" class="score-number" style="font-size: 1.5rem;">0</div>
+      </div>
+      <div class="card score-card" style="padding: 0.8rem;">
+        <span style="font-size: 0.75rem; color: var(--muted);">Accuracy</span>
+        <div id="eval-accuracy" class="score-number" style="font-size: 1.5rem;">0</div>
+      </div>
+      <div class="card score-card" style="padding: 0.8rem;">
+        <span style="font-size: 0.75rem; color: var(--muted);">Confidence</span>
+        <div id="eval-confidence" class="score-number" style="font-size: 1.5rem;">0</div>
+      </div>
+      <div class="card score-card" style="padding: 0.8rem;">
+        <span style="font-size: 0.75rem; color: var(--muted);">Grammar</span>
+        <div id="eval-grammar" class="score-number" style="font-size: 1.5rem;">0</div>
+      </div>
+      <div class="card score-card" style="padding: 0.8rem;">
+        <span style="font-size: 0.75rem; color: var(--muted);">Overall</span>
+        <div id="eval-overall" class="score-number" style="font-size: 1.8rem; font-weight: 800;">0</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h4 style="color: var(--success); font-size: 0.95rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-thumbs-up"></i> Good Points</h4>
+        <ul id="eval-good-points" style="color: var(--muted); font-size: 0.88rem; padding-left: 1.2rem;"></ul>
+      </div>
+      <div>
+        <h4 style="color: var(--danger); font-size: 0.95rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-thumbs-down"></i> Areas to Improve</h4>
+        <ul id="eval-weak-points" style="color: var(--muted); font-size: 0.88rem; padding-left: 1.2rem;"></ul>
+      </div>
+    </div>
+
+    <div id="eval-better-answer-wrap" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); display: none;">
+      <h4 style="color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-lightbulb"></i> Suggested Better Answer</h4>
+      <p id="eval-better-answer" style="color: var(--muted); font-size: 0.9rem; background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 8px;"></p>
+    </div>
+
+    <button id="next-question-btn" class="btn btn-primary" onclick="nextQuestion()" style="margin-top: 1rem;">
+      <i class="fa-solid fa-arrow-right"></i> NEXT QUESTION
+    </button>
+  </div>
+
+  <!-- Session Complete -->
+  <div id="session-complete" class="card" style="display: none; text-align: center; padding: 2rem; border-color: var(--primary);">
+    <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--success);"><i class="fa-solid fa-trophy"></i></div>
+    <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Interview Complete!</h2>
+    <p style="color: var(--muted); margin-bottom: 1rem;">Great effort! Here's your performance summary.</p>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+      <div class="card score-card">
+        <span style="color: var(--muted); font-size: 0.85rem;">Average Score</span>
+        <div id="final-avg-score" class="score-number high" style="font-size: 2.5rem;">0%</div>
+      </div>
+      <div class="card score-card">
+        <span style="color: var(--muted); font-size: 0.85rem;">Questions Answered</span>
+        <div id="final-questions-count" class="score-number" style="font-size: 2.5rem; color: var(--primary);">0</div>
+      </div>
+      <div class="card score-card">
+        <span style="color: var(--muted); font-size: 0.85rem;">Interview Readiness</span>
+        <div id="final-readiness" class="score-number medium" style="font-size: 2.5rem;">0%</div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a href="/interview" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Interview Hub</a>
+      <button class="btn btn-primary" onclick="window.location.reload()"><i class="fa-solid fa-rotate"></i> Practice Again</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/interview_mock.js') }}"></script>
+<script src="{{ url_for('static', filename='js/interview_voice.js') }}"></script>
+{% endblock %}
+

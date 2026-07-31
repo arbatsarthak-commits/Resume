@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile — ResumeIQ AI{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 600px;">
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <div class="hero-tag"><i class="fa-solid fa-user"></i> Account Settings</div>
+    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem;">My Profile</h1>
+    <p style="color: var(--muted);">Manage your account settings</p>
+  </div>
+
+  <div id="profile-error" style="background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.4); color: var(--danger); padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; display: none;">
+    <i class="fa-solid fa-triangle-exclamation"></i> <span id="profile-error-message"></span>
+  </div>
+
+  <div id="profile-success" style="background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.4); color: var(--success); padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; display: none;">
+    <i class="fa-solid fa-circle-check"></i> <span id="profile-success-message"></span>
+  </div>
+
+  <!-- Profile Info -->
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-id-card"></i> Profile Information</h3>
+    
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="profile-name" class="form-control" />
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="profile-email" class="form-control" disabled style="opacity: 0.7;" />
+    </div>
+    <div class="form-group">
+      <label>Role</label>
+      <input type="text" id="profile-role" class="form-control" disabled style="opacity: 0.7;" />
+    </div>
+
+    <button id="update-profile-btn" class="btn btn-primary" onclick="updateProfile()">
+      <i class="fa-solid fa-save"></i> UPDATE PROFILE
+    </button>
+  </div>
+
+  <!-- Change Password -->
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-key"></i> Change Password</h3>
+    
+    <div class="form-group">
+      <label>Current Password</label>
+      <input type="password" id="current-password" class="form-control" />
+    </div>
+    <div class="form-group">
+      <label>New Password</label>
+      <input type="password" id="new-password" class="form-control" minlength="6" />
+    </div>
+
+    <button id="change-password-btn" class="btn btn-primary" onclick="changePassword()">
+      <i class="fa-solid fa-key"></i> CHANGE PASSWORD
+    </button>
+  </div>
+
+  <!-- Delete Account -->
+  <div class="card" style="border-color: rgba(248, 113, 113, 0.4);">
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--danger);"><i class="fa-solid fa-trash"></i> Delete Account</h3>
+    <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem;">
+      Permanently delete your account and all associated data. This action cannot be undone.
+    </p>
+    
+    <div class="form-group">
+      <label>Enter your password to confirm</label>
+      <input type="password" id="delete-password" class="form-control" />
+    </div>
+
+    <button id="delete-account-btn" class="btn btn-danger" onclick="deleteAccount()">
+      <i class="fa-solid fa-trash"></i> DELETE MY ACCOUNT
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", loadProfile);
+
+async function loadProfile() {
+  const token = localStorage.getItem("resumeiq_token");
+  if (!token) {
+    window.location.href = "/login";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/auth/profile", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    if (data.success && data.user) {
+      document.getElementById("profile-name").value = data.user.full_name || "";
+      document.getElementById("profile-email").value = data.user.email || "";
+      document.getElementById("profile-role").value = data.user.role || "user";
+    } else {
+      showError("Failed to load profile.");
+    }
+  } catch (err) {
+    showError("Connection error.");
+  }
+}
+
+function showError(msg) {
+  const div = document.getElementById("profile-error");
+  document.getElementById("profile-error-message").textContent = msg;
+  div.style.display = "block";
+  document.getElementById("profile-success").style.display = "none";
+}
+
+function showSuccess(msg) {
+  const div = document.getElementById("profile-success");
+  document.getElementById("profile-success-message").textContent = msg;
+  div.style.display = "block";
+  document.getElementById("profile-error").style.display = "none";
+}
+
+async function updateProfile() {
+  const token = localStorage.getItem("resumeiq_token");
+  const full_name = document.getElementById("profile-name").value.trim();
+
+  if (!full_name) {
+    showError("Full name is required.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/auth/profile", {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ full_name })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showSuccess("Profile updated successfully.");
+    } else {
+      showError(data.error || "Failed to update profile.");
+    }
+  } catch (err) {
+    showError("Connection error.");
+  }
+}
+
+async function changePassword() {
+  const token = localStorage.getItem("resumeiq_token");
+  const current = document.getElementById("current-password").value;
+  const newPwd = document.getElementById("new-password").value;
+
+  if (!current || !newPwd) {
+    showError("Please fill in both password fields.");
+    return;
+  }
+
+  if (newPwd.length < 6) {
+    showError("New password must be at least 6 characters.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/auth/change-password", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ current_password: current, new_password: newPwd })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showSuccess("Password changed successfully.");
+      document.getElementById("current-password").value = "";
+      document.getElementById("new-password").value = "";
+    } else {
+      showError(data.error || "Failed to change password.");
+    }
+  } catch (err) {
+    showError("Connection error.");
+  }
+}
+
+async function deleteAccount() {
+  if (!confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) return;
+
+  const token = localStorage.getItem("resumeiq_token");
+  const password = document.getElementById("delete-password").value;
+
+  if (!password) {
+    showError("Please enter your password to confirm.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/auth/delete-account", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.removeItem("resumeiq_token");
+      localStorage.removeItem("resumeiq_user");
+      window.location.href = "/";
+    } else {
+      showError(data.error || "Failed to delete account.");
+    }
+  } catch (err) {
+    showError("Connection error.");
+  }
+}
+</script>
+{% endblock %}
+

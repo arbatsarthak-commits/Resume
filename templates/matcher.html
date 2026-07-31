@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Job Description Matcher — ResumeIQ{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <div class="hero-tag"><i class="fa-solid fa-bullseye"></i> Targeted Skill Gap & Keyword Matching</div>
+    <h1 style="font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem;">Job Description Matcher</h1>
+    <p style="color: var(--muted); font-size: 1.05rem; max-width: 700px; margin: 0 auto;">
+      Compare your resume against any target job opening. Uncover matched skills, identify missing keyword requirements, and optimize your application.
+    </p>
+  </div>
+
+  <div class="grid-2">
+    <!-- RESUME INPUT -->
+    <div class="card">
+      <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-file-lines"></i> Your Resume Text</h3>
+      <div class="form-group">
+        <textarea id="matcher-resume-text" class="form-control" rows="12" placeholder="Paste your complete resume text here..."></textarea>
+      </div>
+    </div>
+
+    <!-- JOB DESCRIPTION INPUT -->
+    <div class="card">
+      <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-briefcase"></i> Target Job Description</h3>
+      <div class="form-group">
+        <textarea id="matcher-jd-text" class="form-control" rows="12" placeholder="Paste the complete job description responsibilities and skill requirements here..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 1.5rem;">
+    <button id="run-matcher-btn" class="btn btn-primary btn-lg" style="min-width: 250px;">
+      <i class="fa-solid fa-bullseye"></i> COMPARE & MATCH JOB
+    </button>
+  </div>
+
+  <!-- MATCH RESULTS DISPLAY -->
+  <div id="matcher-results" style="margin-top: 2.5rem; display: none;">
+    <div class="card">
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center;">Match Comparison Results</h2>
+      
+      <div class="grid-2" style="margin-bottom: 2rem;">
+        <!-- SKILL MATCH RATIO -->
+        <div class="card score-card">
+          <span style="color: var(--muted); font-weight: 600;">Technical Skill Match</span>
+          <div id="matcher-skill-score" class="score-number high">0%</div>
+          <div class="score-bar-wrap">
+            <div id="matcher-skill-bar" class="score-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- KEYWORD MATCH RATIO -->
+        <div class="card score-card">
+          <span style="color: var(--muted); font-weight: 600;">Keyword Density Match</span>
+          <div id="matcher-keyword-score" class="score-number medium">0%</div>
+          <div class="score-bar-wrap">
+            <div id="matcher-keyword-bar" class="score-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- MATCHED SKILLS -->
+        <div>
+          <h4 style="color: var(--success); margin-bottom: 0.8rem;"><i class="fa-solid fa-circle-check"></i> Matched Skills Detected</h4>
+          <div id="matcher-matched-skills" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+        </div>
+
+        <!-- MISSING SKILLS -->
+        <div>
+          <h4 style="color: var(--danger); margin-bottom: 0.8rem;"><i class="fa-solid fa-circle-xmark"></i> Not Detected in Your Resume</h4>
+          <div id="matcher-missing-skills" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('run-matcher-btn').addEventListener('click', async () => {
+  const resumeText = document.getElementById('matcher-resume-text').value.trim();
+  const jdText = document.getElementById('matcher-jd-text').value.trim();
+
+  if (!resumeText || !jdText) {
+    alert("Please provide both your resume text and target job description.");
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/jobs/match', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resume_text: resumeText, job_description: jdText })
+    });
+    const res = await response.json();
+    if (!res.success) {
+      alert(res.error || "Matching failed.");
+      return;
+    }
+
+    const m = res.match;
+    document.getElementById('matcher-results').style.display = 'block';
+    
+    const skillPct = Math.round(m.skill_match_ratio * 100);
+    const kwPct = Math.round(m.keyword_match_ratio * 100);
+
+    document.getElementById('matcher-skill-score').innerText = `${skillPct}%`;
+    document.getElementById('matcher-skill-bar').style.width = `${skillPct}%`;
+
+    document.getElementById('matcher-keyword-score').innerText = `${kwPct}%`;
+    document.getElementById('matcher-keyword-bar').style.width = `${kwPct}%`;
+
+    // Matched skills chips
+    const matchedWrap = document.getElementById('matcher-matched-skills');
+    matchedWrap.innerHTML = m.matched_skills.length 
+      ? m.matched_skills.map(s => `<span class="tag-chip matched"><i class="fa-solid fa-check"></i> ${s}</span>`).join('')
+      : '<p style="color: var(--muted);">No matching technical skills detected.</p>';
+
+    // Missing skills chips
+    const missingWrap = document.getElementById('matcher-missing-skills');
+    missingWrap.innerHTML = m.missing_skills.length
+      ? m.missing_skills.map(s => `<span class="tag-chip missing"><i class="fa-solid fa-xmark"></i> ${s}</span>`).join('')
+      : '<p style="color: var(--success);">All key technical skills matched!</p>';
+
+  } catch (err) {
+    alert("Error performing job match request.");
+  }
+});
+</script>
+{% endblock %}

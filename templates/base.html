@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ResumeIQ - Cloud-Based Resume Builder, ATS Resume Analyzer & Job Description Matcher." />
+  <title>{% block title %}ResumeIQ — Cloud-Based Resume Builder & ATS Analyzer{% endblock %}</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- HEADER & NAVIGATION -->
+  <header class="header">
+    <div class="container nav-wrap">
+      <a href="/" class="logo">
+        <i class="fa-solid fa-file-contract"></i> Resume<span>IQ</span>
+        <span class="logo-badge">Pro</span>
+      </a>
+
+      <button class="menu-btn" id="menu-btn" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <nav class="nav-menu" id="nav-menu">
+        <a href="/" class="{% if active_page == 'home' %}active{% endif %}">Home</a>
+        <a href="/builder" class="{% if active_page == 'builder' %}active{% endif %}">Resume Builder</a>
+        <a href="/analyzer" class="{% if active_page == 'analyzer' %}active{% endif %}">ATS Analyzer</a>
+        <a href="/matcher" class="{% if active_page == 'matcher' %}active{% endif %}">Job Matcher</a>
+        <a href="/interview" class="{% if active_page == 'interview' %}active{% endif %}">Interview</a>
+        <a href="/dashboard" class="{% if active_page == 'dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="/templates" class="{% if active_page == 'templates' %}active{% endif %}">Templates</a>
+        <a href="/about" class="{% if active_page == 'about' %}active{% endif %}">About</a>
+        <div id="auth-nav-links"></div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT BLOCK -->
+  <main class="page-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <p>© <span id="year">2026</span> <strong>ResumeIQ</strong> — Cloud-Based Resume Builder & ATS Analyzer.</p>
+      <p style="font-size: 0.8rem; margin-top: 0.4rem; color: var(--muted);">
+        Deterministic Scoring Engine • Privacy First • Local & AWS Dual Architecture
+      </p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

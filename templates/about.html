@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}About ResumeIQ — Architecture & Scoring Methodology{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 900px;">
+  <div style="text-align: center; margin-bottom: 3rem;">
+    <div class="hero-tag"><i class="fa-solid fa-circle-info"></i> Architecture & Engineering Specifications</div>
+    <h1 style="font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem;">About ResumeIQ</h1>
+    <p style="color: var(--muted); font-size: 1.05rem;">
+      A production-grade, dual-mode resume optimization engine designed for deterministic parsing and ATS compatibility scoring.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: 2rem;">
+    <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary);">
+      <i class="fa-solid fa-diagram-project"></i> Core Architecture
+    </h2>
+    <p style="color: var(--muted); margin-bottom: 1rem;">
+      ResumeIQ is built on a decoupled, service-oriented architecture. The core ATS parsing engine is shared identically between local execution mode and AWS cloud deployment mode to prevent logic divergence or fake implementations.
+    </p>
+
+    <div class="grid-2" style="margin-top: 1.5rem;">
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 1.2rem; border-radius: 8px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--success);"><i class="fa-solid fa-laptop-code"></i> Local Mode</h3>
+        <ul style="color: var(--muted); font-size: 0.9rem; padding-left: 1.1rem;">
+          <li><strong>Backend:</strong> Python / Flask REST API</li>
+          <li><strong>Database:</strong> Local SQLite (`data/resumeiq.db`)</li>
+          <li><strong>Storage:</strong> Local filesystem (`storage/uploads` & `storage/generated`)</li>
+          <li><strong>Dependencies:</strong> Zero AWS account or external cloud services required</li>
+        </ul>
+      </div>
+
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 1.2rem; border-radius: 8px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--primary);"><i class="fa-brands fa-aws"></i> AWS Cloud Mode</h3>
+        <ul style="color: var(--muted); font-size: 0.9rem; padding-left: 1.1rem;">
+          <li><strong>Compute:</strong> AWS Lambda serverless execution</li>
+          <li><strong>API Gateway:</strong> Amazon API Gateway REST endpoints</li>
+          <li><strong>Database:</strong> Amazon DynamoDB table</li>
+          <li><strong>Storage:</strong> Amazon S3 private storage bucket</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 2rem;">
+    <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary);">
+      <i class="fa-solid fa-calculator"></i> Deterministic Scoring Methodology
+    </h2>
+    <p style="color: var(--muted); margin-bottom: 1rem;">
+      Unlike tools relying on randomized numbers or unexplainable opaque AI outputs, ResumeIQ scores are 100% deterministic and transparent.
+    </p>
+
+    <div class="grid-2">
+      <div>
+        <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">General Quality Score (100 Max)</h4>
+        <ul style="color: var(--muted); font-size: 0.88rem; padding-left: 1.1rem;">
+          <li><strong>Structure & Headers (25):</strong> Evaluates presence of standard sections.</li>
+          <li><strong>Contact Data (10):</strong> Email, phone, and professional links.</li>
+          <li><strong>Technical Skills (20):</strong> Skill catalog breadth & categorization.</li>
+          <li><strong>Work Experience (15):</strong> Experience depth & action orientation.</li>
+          <li><strong>Projects (15):</strong> Project presence & technical details.</li>
+          <li><strong>Formatting Hygiene (10):</strong> Readable text density & length.</li>
+          <li><strong>Certifications (5):</strong> Verified credentials & awards.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Job Match Score (100 Max)</h4>
+        <ul style="color: var(--muted); font-size: 0.88rem; padding-left: 1.1rem;">
+          <li><strong>Keyword Match (30):</strong> Domain keyword alignment ratio.</li>
+          <li><strong>Skills Match (25):</strong> Required technical skills match ratio.</li>
+          <li><strong>Experience Relevance (15):</strong> Role alignment.</li>
+          <li><strong>Projects Relevance (10):</strong> Applied skill demonstration.</li>
+          <li><strong>Resume Structure (10):</strong> ATS section hierarchy.</li>
+          <li><strong>Contact Info (5):</strong> Reachability score.</li>
+          <li><strong>Formatting (5):</strong> Document readability.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary);">
+      <i class="fa-solid fa-shield-halved"></i> Privacy Policy & Security
+    </h2>
+    <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6;">
+      Uploaded resumes contain sensitive personal contact information. In local mode, documents and database records remain exclusively on your local machine. In cloud mode, files are stored in private, non-public S3 buckets protected by IAM least-privilege policies. You retain complete control to view and permanently delete any stored analysis and associated document at any time via the Dashboard.
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Interview Platform — ResumeIQ AI{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <div class="hero-tag"><i class="fa-solid fa-phone"></i> AI Interview Platform</div>
+    <h1 style="font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem;">Interview Preparation</h1>
+    <p style="color: var(--muted); font-size: 1.05rem; max-width: 700px; margin: 0 auto;">
+      Practice with HR, Technical, Behavioral, and Coding interviews. Get AI-powered feedback and track your readiness.
+    </p>
+  </div>
+
+  <!-- Interview Types Grid -->
+  <div class="grid-3" style="margin-bottom: 2.5rem;">
+    <div class="card feature-card" onclick="startInterview('hr')" style="cursor: pointer;">
+      <div class="feature-icon"><i class="fa-solid fa-handshake"></i></div>
+      <h3>HR Interview</h3>
+      <p style="color: var(--muted); font-size: 0.9rem;">Common HR questions, motivation, teamwork, conflict resolution, and career goals.</p>
+      <div style="margin-top: 1rem;">
+        <span class="tag-chip">Easy-Medium</span>
+        <span class="tag-chip">8+ Questions</span>
+      </div>
+    </div>
+
+    <div class="card feature-card" onclick="startInterview('technical')" style="cursor: pointer;">
+      <div class="feature-icon"><i class="fa-solid fa-microchip"></i></div>
+      <h3>Technical Interview</h3>
+      <p style="color: var(--muted); font-size: 0.9rem;">Python, OOP, SQL, REST APIs, Cloud, Docker, System Design concepts.</p>
+      <div style="margin-top: 1rem;">
+        <span class="tag-chip">Medium-Hard</span>
+        <span class="tag-chip">18+ Questions</span>
+      </div>
+    </div>
+
+    <div class="card feature-card" onclick="startInterview('behavioral')" style="cursor: pointer;">
+      <div class="feature-icon"><i class="fa-solid fa-users"></i></div>
+      <h3>Behavioral Interview</h3>
+      <p style="color: var(--muted); font-size: 0.9rem;">STAR method, leadership, teamwork, problem-solving, and adaptability scenarios.</p>
+      <div style="margin-top: 1rem;">
+        <span class="tag-chip">Medium</span>
+        <span class="tag-chip">STAR Method</span>
+      </div>
+    </div>
+
+    <div class="card feature-card" onclick="startInterview('coding')" style="cursor: pointer;">
+      <div class="feature-icon"><i class="fa-solid fa-code"></i></div>
+      <h3>Coding Interview</h3>
+      <p style="color: var(--muted); font-size: 0.9rem;">Algorithms, data structures, problem-solving with code walkthroughs.</p>
+      <div style="margin-top: 1rem;">
+        <span class="tag-chip">Medium-Hard</span>
+        <span class="tag-chip">Logic Focus</span>
+      </div>
+    </div>
+
+    <div class="card feature-card" onclick="startInterview('system_design')" style="cursor: pointer;">
+      <div class="feature-icon"><i class="fa-solid fa-diagram-project"></i></div>
+      <h3>System Design</h3>
+      <p style="color: var(--muted); font-size: 0.9rem;">Architecture discussions: chat systems, video platforms, e-commerce design.</p>
+      <div style="margin-top: 1rem;">
+        <span class="tag-chip">Hard</span>
+        <span class="tag-chip">Architecture</span>
+      </div>
+    </div>
+
+    <div class="card feature-card" onclick="startInterview('mcq')" style="cursor: pointer;">
+      <div class="feature-icon"><i class="fa-solid fa-list-check"></i></div>
+      <h3>MCQ Test</h3>
+      <p style="color: var(--muted); font-size: 0.9rem;">Multiple choice questions covering Python, SQL, Cloud, Git, and more.</p>
+      <div style="margin-top: 1rem;">
+        <span class="tag-chip">Easy-Medium</span>
+        <span class="tag-chip">Instant Scoring</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resume-Based Interview -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <h3 style="font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--primary);">
+      <i class="fa-solid fa-file-pen"></i> Resume-Based Interview
+    </h3>
+    <p style="color: var(--muted); margin-bottom: 1rem;">
+      Questions generated specifically from your resume content. Paste your resume text below.
+    </p>
+    <div class="form-group">
+      <textarea id="resume-text-interview" class="form-control" rows="5" placeholder="Paste your resume text here to get personalized questions..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="startResumeInterview()">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Resume Questions
+    </button>
+  </div>
+
+  <!-- JD-Based Interview -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <h3 style="font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--primary);">
+      <i class="fa-solid fa-bullseye"></i> Job Description Based Interview
+    </h3>
+    <p style="color: var(--muted); margin-bottom: 1rem;">
+      Practice with questions tailored to a specific job description.
+    </p>
+    <div class="form-group">
+      <textarea id="jd-text-interview" class="form-control" rows="5" placeholder="Paste the job description here..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="startJDInterview()">
+      <i class="fa-solid fa-bullseye"></i> Generate JD Questions
+    </button>
+  </div>
+
+  <!-- Interview History -->
+  <div class="card">
+    <h3 style="font-size: 1.2rem; margin-bottom: 1rem;">
+      <i class="fa-solid fa-clock-rotate-left"></i> Interview History
+    </h3>
+    <div id="interview-history">
+      <p style="color: var(--muted);">Loading interview history...</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/interview.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", loadInterviewHistory);
+
+async function loadInterviewHistory() {
+  try {
+    const res = await fetch("/api/interview/history");
+    const data = await res.json();
+    const container = document.getElementById("interview-history");
+
+    if (!data.success || !data.sessions || data.sessions.length === 0) {
+      container.innerHTML = '<p style="color: var(--muted);">No interview sessions found. Start your first practice session above!</p>';
+      return;
+    }
+
+    container.innerHTML = '<div style="overflow-x: auto;"><table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Questions</th><th>Avg Score</th><th>Readiness</th><th>Actions</th></tr></thead><tbody>' +
+      data.sessions.map(s => {
+        const dateStr = new Date(s.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const readiness = s.readiness?.readiness_score ?? 'N/A';
+        return `<tr>
+          <td>${dateStr}</td>
+          <td><span class="tag-chip">${s.interview_type}</span></td>
+          <td>${s.question_count}</td>
+          <td><strong>${s.average_score}%</strong></td>
+          <td>${readiness}%</td>
+          <td><button class="btn btn-secondary btn-sm" onclick="window.location.href='/interview/results/${s.session_id}'"><i class="fa-solid fa-eye"></i> View</button></td>
+        </tr>`;
+      }).join('') + '</tbody></table></div>';
+  } catch (err) {
+    document.getElementById("interview-history").innerHTML = '<p style="color: var(--danger);">Failed to load history.</p>';
+  }
+}
+
+function startInterview(type) {
+  window.location.href = `/interview/mock?type=${type}`;
+}
+
+function startResumeInterview() {
+  const text = document.getElementById("resume-text-interview").value.trim();
+  if (!text) {
+    alert("Please paste your resume text first.");
+    return;
+  }
+  window.location.href = `/interview/mock?type=resume_based&resume=${encodeURIComponent(text)}`;
+}
+
+function startJDInterview() {
+  const text = document.getElementById("jd-text-interview").value.trim();
+  if (!text) {
+    alert("Please paste a job description first.");
+    return;
+  }
+  window.location.href = `/interview/mock?type=jd_based&jd=${encodeURIComponent(text)}`;
+}
+</script>
+{% endblock %}
+
